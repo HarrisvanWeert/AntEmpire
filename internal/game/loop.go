@@ -30,6 +30,9 @@ func GameLoop() {
 	ticker := time.NewTicker(250 * time.Millisecond)
 	defer ticker.Stop()
 
+	rollingLogs := []string{}
+	const maxLogs = 8
+
 	for range ticker.C {
 		game.Tick++
 
@@ -39,11 +42,21 @@ func GameLoop() {
 			game.Workers += event.WorkerDelta
 		}
 
+		for len(ch.LogChan) > 0 {
+			rollingLogs = append(rollingLogs, <-ch.LogChan)
+
+			if len(rollingLogs) > maxLogs {
+				rollingLogs = rollingLogs[1:]
+			}
+		}
+
 		ui.Clear()
 
-		for len(ch.LogChan) > 0 {
-			fmt.Println(<-ch.LogChan)
+		fmt.Println("Events:")
+		for _, log := range rollingLogs {
+			fmt.Println(" -", log)
 		}
+		fmt.Println()
 
 		ui.DisplayStats(game.Workers, game.Food, game.Tick)
 	}
