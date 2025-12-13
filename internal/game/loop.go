@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"harrisvw/internal/ui"
 	"time"
 )
@@ -52,12 +51,6 @@ func GameLoop() {
 
 		ui.Clear()
 
-		fmt.Println("Events:")
-		for _, log := range rollingLogs {
-			fmt.Println(" -", log)
-		}
-		fmt.Println()
-
-		ui.DisplayStats(game.Workers, game.Food, game.Tick)
+		ui.Render(game.Tick, game.Workers, game.Food, game.Eggs)
 	}
 }
