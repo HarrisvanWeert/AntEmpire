@@ -19,12 +19,23 @@ func DrawAnts(screen *ebiten.Image, ants []AntSprite) {
 	}
 }
 
-// NewAntSprite returns a new random ant
 func NewAntSprite() AntSprite {
+	randomVelocity := func() float64 {
+		v := (rand.Float64() * 4) - 2
+		if v > -0.5 && v < 0.5 {
+			if v >= 0 {
+				v = 0.5 + rand.Float64()*1.5
+			} else {
+				v = -0.5 - rand.Float64()*1.5
+			}
+		}
+		return v
+	}
+
 	return AntSprite{
-		X:  float64(100 + rand.Intn(400)),
-		Y:  float64(100 + rand.Intn(300)),
-		VX: float64(rand.Intn(3)+1) * 0.5,
-		VY: float64(rand.Intn(3)+1) * 0.5,
+		X:  float64(rand.Intn(540) + 50),
+		Y:  float64(rand.Intn(380) + 50),
+		VX: randomVelocity(),
+		VY: randomVelocity(),
 	}
 }

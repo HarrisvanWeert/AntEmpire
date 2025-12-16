@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"harrisvw/internal/game"
 	"harrisvw/internal/ui"
 	"log"
@@ -17,4 +18,5 @@ func main() {
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("Game Stopped")
 }

@@ -7,7 +7,13 @@ import (
 func StartWorker(ch GameChannels) {
 	for {
 		time.Sleep(1 * time.Second)
-		ch.StateChan <- StateEvent{FoodDelta: 1}
-		ch.LogChan <- "Worker gathered 1 food"
+		select {
+		case ch.StateChan <- StateEvent{FoodDelta: 1}:
+			select {
+			case ch.LogChan <- "Worker gathered 1 food":
+			default:
+			}
+		default:
+		}
 	}
 }

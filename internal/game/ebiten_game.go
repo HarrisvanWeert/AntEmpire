@@ -2,6 +2,7 @@ package game
 
 import (
 	"harrisvw/internal/assets"
+	"math/rand/v2"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -26,21 +27,22 @@ func NewEbitenGame(drawUI func(screen *ebiten.Image, state *GameState, ants []as
 	ch := GameChannels{
 		EggChan:   make(chan int),
 		LogChan:   make(chan string, 20),
-		StateChan: make(chan StateEvent, 50),
+		StateChan: make(chan StateEvent, 5000),
+		FoodQuery: make(chan chan int),
 	}
 
 	for i := 0; i < state.Workers; i++ {
 		go StartWorker(ch)
 	}
 
-	go StartQueen(state, ch)
+	go StartQueen(ch)
 	go StartNest(state, ch)
 
 	g := &EbitenGame{
 		State:    state,
 		Ch:       ch,
 		lastTick: time.Now(),
-		DrawUI:   drawUI, // Set it here
+		DrawUI:   drawUI,
 	}
 
 	for i := 0; i < state.Workers; i++ {
@@ -58,13 +60,39 @@ func (g *EbitenGame) Update() error {
 
 	g.State.Tick++
 
-	for len(g.Ch.StateChan) > 0 {
-		event := <-g.Ch.StateChan
-		g.State.Food += event.FoodDelta
-		g.State.Workers += event.WorkerDelta
+	for {
+		select {
+		case msg := <-g.Ch.LogChan:
+			g.logs = append(g.logs, msg)
+			if len(g.logs) > 100 {
+				g.logs = g.logs[len(g.logs)-100:]
+			}
+		default:
+			goto doneDrainingLogs
+		}
 	}
+doneDrainingLogs:
 
-	//moving ants
+	select {
+	case reply := <-g.Ch.FoodQuery:
+		reply <- g.State.Food
+	default:
+	}
+	for {
+		select {
+		case event := <-g.Ch.StateChan:
+			g.State.Food += event.FoodDelta
+			g.State.Workers += event.WorkerDelta
+
+			if event.WorkerDelta > 0 {
+				g.Ants = append(g.Ants, assets.NewAntSprite())
+			}
+		default:
+			goto doneProcessing
+		}
+	}
+doneProcessing:
+
 	for i := range g.Ants {
 		g.Ants[i].X += g.Ants[i].VX
 		g.Ants[i].Y += g.Ants[i].VY
@@ -74,6 +102,21 @@ func (g *EbitenGame) Update() error {
 		}
 		if g.Ants[i].Y < 0 || g.Ants[i].Y > 480 {
 			g.Ants[i].VY *= -1
+		}
+		if rand.Float64() < 0.05 {
+			g.Ants[i].VX += (rand.Float64() - 0.5) * 0.5
+			g.Ants[i].VY += (rand.Float64() - 0.5) * 0.5
+
+			if g.Ants[i].VX > 3 {
+				g.Ants[i].VX = 3
+			} else if g.Ants[i].VX < -3 {
+				g.Ants[i].VX = -3
+			}
+			if g.Ants[i].VY > 3 {
+				g.Ants[i].VY = 3
+			} else if g.Ants[i].VY < -3 {
+				g.Ants[i].VY = -3
+			}
 		}
 	}
 

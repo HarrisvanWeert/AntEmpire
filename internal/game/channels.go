@@ -9,4 +9,5 @@ type GameChannels struct {
 	EggChan   chan int
 	LogChan   chan string
 	StateChan chan StateEvent
+	FoodQuery chan chan int
 }
