@@ -1,25 +1,22 @@
 package game
 
 import (
+	"harrisvw/internal/assets"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// EbitenGame wraps your game state and channels
 type EbitenGame struct {
-	State *GameState
-	Ch    GameChannels
-
+	State    *GameState
+	Ch       GameChannels
 	lastTick time.Time
-
-	// DrawUI is a callback for rendering, set from main
-	DrawUI func(screen *ebiten.Image, state *GameState)
-	logs   []string
+	DrawUI   func(screen *ebiten.Image, state *GameState, ants []assets.AntSprite)
+	Ants     []assets.AntSprite
+	logs     []string
 }
 
-// NewEbitenGame initializes the game and starts goroutines
-func NewEbitenGame() *EbitenGame {
+func NewEbitenGame(drawUI func(screen *ebiten.Image, state *GameState, ants []assets.AntSprite)) *EbitenGame {
 	state := &GameState{
 		Food:    0,
 		Workers: 3,
@@ -39,14 +36,20 @@ func NewEbitenGame() *EbitenGame {
 	go StartQueen(state, ch)
 	go StartNest(state, ch)
 
-	return &EbitenGame{
+	g := &EbitenGame{
 		State:    state,
 		Ch:       ch,
 		lastTick: time.Now(),
+		DrawUI:   drawUI, // Set it here
 	}
+
+	for i := 0; i < state.Workers; i++ {
+		g.Ants = append(g.Ants, assets.NewAntSprite())
+	}
+
+	return g
 }
 
-// Update advances the game logic every 250ms
 func (g *EbitenGame) Update() error {
 	if time.Since(g.lastTick) < 250*time.Millisecond {
 		return nil
@@ -61,17 +64,28 @@ func (g *EbitenGame) Update() error {
 		g.State.Workers += event.WorkerDelta
 	}
 
+	//moving ants
+	for i := range g.Ants {
+		g.Ants[i].X += g.Ants[i].VX
+		g.Ants[i].Y += g.Ants[i].VY
+
+		if g.Ants[i].X < 0 || g.Ants[i].X > 640 {
+			g.Ants[i].VX *= -1
+		}
+		if g.Ants[i].Y < 0 || g.Ants[i].Y > 480 {
+			g.Ants[i].VY *= -1
+		}
+	}
+
 	return nil
 }
 
-// Draw calls the UI callback
 func (g *EbitenGame) Draw(screen *ebiten.Image) {
 	if g.DrawUI != nil {
-		g.DrawUI(screen, g.State)
+		g.DrawUI(screen, g.State, g.Ants)
 	}
 }
 
-// Layout sets the window size
 func (g *EbitenGame) Layout(w, h int) (int, int) {
 	return 640, 480
 }
