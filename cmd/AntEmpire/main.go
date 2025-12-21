@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"harrisvw/internal/assets"
 	"harrisvw/internal/game"
 	"harrisvw/internal/ui"
 	"log"
@@ -10,6 +11,10 @@ import (
 )
 
 func main() {
+
+	assets.LoadSprites()
+	fmt.Println("Ant image size:", assets.Antimage.Bounds())
+
 	ebiten.SetWindowTitle("Ant Colony")
 	ebiten.SetWindowSize(960, 720)
 

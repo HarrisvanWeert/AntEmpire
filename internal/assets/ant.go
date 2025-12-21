@@ -1,11 +1,9 @@
 package assets
 
 import (
-	"image/color"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type AntSprite struct {
@@ -15,7 +13,13 @@ type AntSprite struct {
 
 func DrawAnts(screen *ebiten.Image, ants []AntSprite) {
 	for _, ant := range ants {
-		ebitenutil.DrawRect(screen, ant.X, ant.Y, 4, 4, color.White)
+		op := &ebiten.DrawImageOptions{}
+
+		scale := 0.02
+		op.GeoM.Scale(scale, scale)
+		op.GeoM.Translate(ant.X, ant.Y)
+
+		screen.DrawImage(Antimage, op)
 	}
 }
 

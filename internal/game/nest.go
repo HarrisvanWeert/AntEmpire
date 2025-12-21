@@ -39,7 +39,6 @@ func StartNest(g *GameState, ch GameChannels) {
 
 		default:
 			// FAILED SEND
-			// This is the CRITICAL failure path.
 			select {
 			case ch.LogChan <- "NEST: FAILURE! StateChan is full. Worker NOT created.":
 			default:
