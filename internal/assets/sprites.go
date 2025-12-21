@@ -8,6 +8,7 @@ import (
 )
 
 var Antimage *ebiten.Image
+var BackGroundImage *ebiten.Image
 
 func LoadSprites() {
 	file, err := os.Open("../../internal/assets/images/ant.png")
@@ -21,6 +22,18 @@ func LoadSprites() {
 		panic(err)
 	}
 
+	bgFile, err := os.Open("../../internal/assets/images/terrain.png")
+	if err != nil {
+		panic(err)
+	}
+	defer bgFile.Close()
+
+	bgImage, err := png.Decode(bgFile)
+	if err != nil {
+		panic(err)
+	}
+
+	BackGroundImage = ebiten.NewImageFromImage(bgImage)
 	Antimage = ebiten.NewImageFromImage(img)
 
 }

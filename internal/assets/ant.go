@@ -15,7 +15,7 @@ func DrawAnts(screen *ebiten.Image, ants []AntSprite) {
 	for _, ant := range ants {
 		op := &ebiten.DrawImageOptions{}
 
-		scale := 0.02
+		scale := 0.03
 		op.GeoM.Scale(scale, scale)
 		op.GeoM.Translate(ant.X, ant.Y)
 

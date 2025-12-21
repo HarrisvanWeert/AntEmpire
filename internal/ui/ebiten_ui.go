@@ -12,6 +12,9 @@ import (
 )
 
 func Draw(screen *ebiten.Image, state *game.GameState, ants []assets.AntSprite) {
+	op := &ebiten.DrawImageOptions{}
+	screen.DrawImage(assets.BackGroundImage, op)
+
 	text.Draw(screen, "ANT COLONY SIM", basicfont.Face7x13, 20, 30, color.White)
 	text.Draw(screen, fmt.Sprintf("Tick: %d", state.Tick), basicfont.Face7x13, 20, 50, color.White)
 	text.Draw(screen, fmt.Sprintf("Ants: %d", state.Workers), basicfont.Face7x13, 20, 70, color.White)
